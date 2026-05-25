@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LinkVault</title>
+<style>
+  :root{
+    --bg:#f1f5f9;
+    --bg2:#e2e8f0;
+    --card:rgba(255,255,255,.72);
+    --card-border:rgba(255,255,255,.85);
+    --text:#0f172a;
+    --text-secondary:#64748b;
+    --accent:#6366f1;
+    --accent-hover:#4f46e5;
+    --accent-soft:rgba(99,102,241,.12);
+    --danger:#ef4444;
+    --danger-hover:#dc2626;
+    --danger-soft:rgba(239,68,68,.12);
+    --border:rgba(148,163,184,.2);
+    --shadow:0 1px 2px rgba(0,0,0,.04), 0 1px 1px rgba(0,0,0,.06);
+    --shadow-hover:0 8px 20px rgba(0,0,0,.08), 0 3px 8px rgba(0,0,0,.04);
+    --radius:14px;
+    --radius-sm:8px;
+  }
+  body.dark{
+    --bg:#0b0f1a;
+    --bg2:#131a2c;
+    --card:rgba(24,33,50,.78);
+    --card-border:rgba(51,65,85,.55);
+    --text:#e2e8f0;
+    --text-secondary:#8899b0;
+    --accent:#818cf8;
+    --accent-hover:#a5b4fc;
+    --accent-soft:rgba(129,140,248,.12);
+    --danger:#f87171;
+    --danger-hover:#fca5a5;
+    --danger-soft:rgba(248,113,113,.12);
+    --border:rgba(51,65,85,.35);
+    --shadow:0 1px 2px rgba(0,0,0,.18), 0 1px 1px rgba(0,0,0,.24);
+    --shadow-hover:0 8px 20px rgba(0,0,0,.35), 0 3px 8px rgba(0,0,0,.2);
+  }
+  body.oled{
+    --bg:#000000;
+    --bg2:#050505;
+    --card:rgba(18,18,18,.88);
+    --card-border:rgba(50,50,50,.6);
+    --text:#e2e8f0;
+    --text-secondary:#889199;
+    --accent:#818cf8;
+    --accent-hover:#a5b4fc;
+    --accent-soft:rgba(129,140,248,.12);
+    --danger:#f87171;
+    --danger-hover:#fca5a5;
+    --danger-soft:rgba(248,113,113,.12);
+    --border:rgba(40,40,40,.55);
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 1px 1px rgba(0,0,0,.45);
+    --shadow-hover:0 8px 20px rgba(0,0,0,.55), 0 3px 8px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, var(--bg), var(--bg2));
+    color:var(--text);
+    min-height:100vh;
+    transition:background .4s ease, color .3s ease;
+  }
+  .app{
+    max-width:800px;
+    margin:0 auto;
+    padding:24px 16px;
+  }
+  .header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:0;
+  }
+  .header h1{
+    font-size:1.2rem;
+    cursor:pointer;
+    transition:opacity .2s;
+    outline:none;
+    border-bottom:2px solid transparent;
+  }
+  .header h1:hover{ opacity:.8; }
+  .header h1:focus{
+    cursor:text;
+    opacity:1;
+    border-bottom-color:var(--accent);
+  }
+    font-weight:700;
+    letter-spacing:-.03em;
+    background:linear-gradient(135deg, var(--accent), #c084fc);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .header-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  .sub{
+    color:var(--text-secondary);
+    font-size:.78rem;
+    margin-bottom:12px;
+    line-height:1.5;
+  }
+  .sub code{
+    background:var(--accent-soft);
+    color:var(--accent);
+    padding:1px 8px;
+    border-radius:5px;
+    font-size:.78rem;
+    font-weight:500;
+  }
+  .input-section{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    box-shadow:var(--shadow);
+    margin-bottom:12px;
+    overflow:visible;
+    position:relative;
+    z-index:10;
+  }
+  .input-section textarea{
+    width:100%;
+    min-height:60px;
+    resize:vertical;
+    background:transparent;
+    color:var(--text);
+    border:none;
+    border-radius:0;
+    padding:0;
+    font-size:.85rem;
+    font-family:inherit;
+    line-height:1.5;
+  }
+  .input-section textarea:focus{
+    outline:none;
+  }
+  .input-section textarea::placeholder{ color:var(--text-secondary); opacity:.6; }
+  .input-section .input-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid var(--border);
+    overflow:visible;
+  }
+  .input-section .input-meta button{
+    padding:6px 14px;
+    font-size:.78rem;
+  }
+  .input-section .input-meta button.secondary{
+    padding:5px 12px;
+    font-size:.76rem;
+  }
+  .input-actions{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .default-cat-label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:.8rem;
+    color:var(--text-secondary);
+  }
+  .default-cat-label{ position:relative; display:inline-block; }
+  .default-cat-label input{
+    background:var(--bg);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:5px 10px;
+    font-size:.8rem;
+    width:240px;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .default-cat-label input:hover{
+    border-color:var(--text-secondary);
+  }
+  .default-cat-label input:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .cat-dropdown{
+    position:absolute;
+    top:100%;
+    left:0;
+    right:0;
+    margin-top:4px;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:8px;
+    max-height:180px;
+    overflow-y:auto;
+    box-shadow:0 8px 24px rgba(0,0,0,.3);
+    z-index:999;
+    display:none;
+  }
+  .cat-dropdown.show{ display:block; }
+  .cat-dropdown .cat-opt{
+    padding:6px 10px;
+    font-size:.78rem;
+    cursor:pointer;
+    color:var(--text);
+    transition:background .1s;
+  }
+  .cat-dropdown .cat-opt:hover,
+  .cat-dropdown .cat-opt.highlight{
+    background:var(--accent-soft);
+    color:var(--accent);
+  }
+  .cat-dropdown .cat-opt.empty{
+    color:var(--text-secondary);
+    cursor:default;
+  }
+  .cat-dropdown .cat-opt.empty:hover{
+    background:transparent;
+    color:var(--text-secondary);
+  }
+  button{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:7px 14px;
+    border-radius:7px;
+    cursor:pointer;
+    font-size:.78rem;
+    font-weight:600;
+    letter-spacing:-.01em;
+    transition:all .2s ease;
+    box-shadow:var(--shadow);
+  }
+  button:hover{
+    background:var(--accent-hover);
+    box-shadow:var(--shadow-hover);
+    transform:translateY(-1px);
+  }
+  button:active{
+    transform:translateY(0) scale(.98);
+    box-shadow:var(--shadow);
+  }
+  button.secondary{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    box-shadow:none;
+  }
+  button.secondary:hover{
+    background:var(--card);
+    border-color:var(--accent);
+    color:var(--accent);
+    box-shadow:var(--shadow-hover);
+  }
+  button.danger{
+    background:var(--danger-soft);
+    color:var(--danger);
+    box-shadow:none;
+  }
+  button.danger:hover{
+    background:var(--danger);
+    color:#fff;
+    box-shadow:var(--shadow-hover);
+  }
+  .group{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    padding:0;
+    margin-top:12px;
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    box-shadow:var(--shadow);
+    transition:box-shadow .3s ease;
+    overflow:hidden;
+  }
+  .group:hover{
+    box-shadow:var(--shadow-hover);
+  }
+  .group-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:6px;
+    padding:10px 14px;
+    cursor:pointer;
+    user-select:none;
+    transition:background .15s;
+  }
+  .group-head:hover{
+    background:var(--accent-soft);
+  }
+  .group-head .chevron{
+    font-size:.65rem;
+    color:var(--text-secondary);
+    transition:transform .25s ease;
+    display:inline-block;
+    margin-right:6px;
+  }
+  .group.collapsed .chevron{
+    transform:rotate(-90deg);
+  }
+  .group-head h3{
+    font-size:.92rem;
+    font-weight:600;
+    letter-spacing:-.01em;
+    display:inline-flex;
+    align-items:center;
+  }
+  .group-head .count{
+    margin-left:8px;
+    font-size:.78rem;
+    font-weight:500;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:1px 10px;
+    border-radius:20px;
+  }
+  .group-actions{
+    display:flex;
+    gap:4px;
+    flex-wrap:wrap;
+  }
+  .group-actions button{
+    padding:4px 10px;
+    font-size:.75rem;
+    border-radius:6px;
+  }
+  .group .group-body{
+    padding:0 14px 10px;
+    transition:max-height .3s ease, opacity .25s ease;
+  }
+  .group.collapsed .group-body{
+    max-height:0 !important;
+    padding:0 18px;
+    opacity:0;
+    overflow:hidden;
+  }
+  ul{ list-style:none; padding:0; }
+  li{
+    padding:5px 0 5px 16px;
+    border-bottom:1px solid var(--border);
+    position:relative;
+    line-height:1.4;
+    font-size:.82rem;
+  }
+  li:last-child{ border-bottom:none; }
+  li{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  li::before{
+    content:"";
+    flex-shrink:0;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--accent);
+    opacity:.5;
+    margin-right:2px;
+  }
+  li .li-link{
+    flex:1;
+    min-width:0;
+  }
+  li .li-link a{
+    color:var(--accent);
+    word-break:break-all;
+    text-decoration:none;
+    font-weight:500;
+    transition:color .15s;
+  }
+  li .li-link a:hover{ color:var(--accent-hover); }
+  li .li-link .note{
+    color:var(--text-secondary);
+    font-size:.78rem;
+  }
+  li .li-actions{
+    display:flex;
+    gap:2px;
+    flex-shrink:0;
+    opacity:.3;
+    transition:opacity .2s;
+  }
+  li:hover .li-actions{ opacity:1; }
+  li .li-actions button{
+    padding:2px 5px;
+    font-size:.65rem;
+    border-radius:4px;
+    background:transparent;
+    color:var(--text-secondary);
+    border:none;
+    cursor:pointer;
+    transition:color .15s, background .15s;
+    box-shadow:none;
+    min-width:20px;
+    height:20px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  li .li-actions button:hover{ background:var(--accent-soft); color:var(--accent); }
+  li .li-actions .li-del:hover{ background:var(--danger-soft); color:var(--danger); }
+
+  .empty{
+    text-align:center;
+    padding:36px 16px;
+    color:var(--text-secondary);
+    font-size:.82rem;
+  }
+  .hidden{ display:none !important; }
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(10px);
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--card-border);
+    padding:12px 20px;
+    border-radius:var(--radius-sm);
+    font-size:.85rem;
+    box-shadow:0 8px 32px rgba(0,0,0,.18);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    opacity:0;
+    transition:opacity .3s ease, transform .3s ease;
+    pointer-events:none;
+    z-index:100;
+    white-space:pre-line;
+    max-width:90vw;
+    max-height:40vh;
+    overflow-y:auto;
+    line-height:1.5;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+  #importInput{ display:none; }
+  .search-section{
+    margin-bottom:12px;
+  }
+  .search-section .search-wrap{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    padding:3px 3px 3px 12px;
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    box-shadow:var(--shadow);
+    transition:border-color .25s, box-shadow .25s;
+  }
+  .search-section .search-wrap:focus-within{
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft);
+  }
+  .search-section .search-wrap input{
+    flex:1;
+    background:transparent;
+    color:var(--text);
+    border:none;
+    padding:8px 0;
+    font-size:.85rem;
+    font-family:inherit;
+    outline:none;
+  }
+  .search-section .search-wrap input::placeholder{ color:var(--text-secondary); opacity:.6; }
+  .search-section .search-wrap select{
+    background:var(--bg);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:5px 8px;
+    font-size:.75rem;
+    cursor:pointer;
+  }
+  .search-section .search-wrap select:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  .search-section .search-meta{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:6px;
+    padding-left:4px;
+    font-size:.72rem;
+    color:var(--text-secondary);
+  }
+  /* --- Modal --- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .modal-overlay.show{
+    opacity:1;
+    pointer-events:all;
+  }
+  .modal-box{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    padding:20px;
+    width:90%;
+    max-width:520px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    transform:translateY(12px);
+    transition:transform .25s ease;
+  }
+  .modal-overlay.show .modal-box{
+    transform:translateY(0);
+  }
+  .modal-box h2{
+    font-size:.95rem;
+    font-weight:600;
+    margin-bottom:4px;
+    letter-spacing:-.01em;
+  }
+  .modal-box .modal-sub{
+    font-size:.78rem;
+    color:var(--text-secondary);
+    margin-bottom:18px;
+  }
+  .modal-box label{
+    display:block;
+    font-size:.8rem;
+    font-weight:500;
+    color:var(--text-secondary);
+    margin-bottom:4px;
+  }
+  .modal-box input, .modal-box textarea{
+    width:100%;
+    background:var(--bg);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:7px;
+    padding:8px 10px;
+    font-size:.82rem;
+    font-family:inherit;
+    transition:border-color .2s;
+    margin-bottom:14px;
+  }
+  .modal-box input:focus, .modal-box textarea:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .modal-box textarea{
+    resize:vertical;
+    min-height:50px;
+  }
+  .modal-actions{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+    margin-top:4px;
+  }
+  .modal-actions button{
+    padding:7px 18px;
+    font-size:.8rem;
+  }
+  @media(max-width:600px){
+    .app{ padding:12px; }
+    .header h1{ font-size:1.1rem; }
+    .input-section{ padding:10px 12px; }
+    .search-section .search-wrap{ flex-wrap:wrap; padding:8px 10px; }
+    .search-section .search-wrap select{ width:100%; }
+    .default-cat-label input{ width:140px; }
+    .modal-box{ padding:16px; }
+  }
+</style>
+</head>
+<body class="oled">
+<div class="app">
+  <div class="header">
+    <h1 id="pageTitle" contenteditable="true" title="Clic para editar el nombre">LinkVault</h1>
+    <div class="header-actions">
+      <button id="toggleTheme" class="secondary" title="Cambiar tema">OLED</button>
+    </div>
+  </div>
+  <p class="sub">
+    Escribí un título y debajo pegá links. Podés agregar notas con o sin paréntesis.<br>
+    Ej: <code>Tutoriales</code> luego <code>https://youtube.com/abc muy bueno</code>
+  </p>
+
+  <div class="input-section">
+    <textarea id="input" placeholder="Pegá acá tu texto..."></textarea>
+    <div class="input-meta">
+      <span style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text-secondary);">
+        Links sin título van a:
+        <span class="default-cat-label">
+          <input id="defaultCategory" placeholder="Sin categoría" autocomplete="off">
+          <div id="catDropdown" class="cat-dropdown"></div>
+        </span>
+      </span>
+      <div class="input-actions">
+        <button id="process">Procesar</button>
+        <button id="checkDupBtn" class="secondary">Verificar duplicados</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+    <button id="addCategoryBtn" class="secondary" style="padding:7px 14px;font-size:.8rem;">+ Nueva categoría</button>
+    <button id="newBtn" class="secondary" style="padding:7px 14px;font-size:.8rem;">Nuevo</button>
+    <button id="exportBtn" class="secondary" style="padding:7px 14px;font-size:.8rem;">Exportar JSON</button>
+    <button id="importBtn" class="secondary" style="padding:7px 14px;font-size:.8rem;">Importar JSON</button>
+    <input type="file" id="importInput" accept=".json">
+  </div>
+
+  <div class="search-section">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Buscá por texto del link, título o nota...">
+      <select id="themeFilter">
+        <option value="">Todas las categorías</option>
+      </select>
+    </div>
+    <div class="search-meta">
+      <span id="resultCount"></span>
+      <button id="sortBtn" class="secondary" style="padding:3px 10px;font-size:.75rem;border-radius:6px;" title="Ordenar categorías">A-Z ↓</button>
+    </div>
+  </div>
+
+  <div id="output"></div>
+  <div id="emptyState" class="empty hidden">
+    <p>No hay links todavía. Escribí algo arriba y presioná <strong>Procesar</strong>.</p>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-box">
+    <h2>Editar link</h2>
+    <p class="modal-sub">Modificá la URL y/o la anotación</p>
+    <label for="modalUrl">Link</label>
+    <input id="modalUrl" type="url" placeholder="https://...">
+    <label for="modalNote">Anotación</label>
+    <textarea id="modalNote" placeholder="Comentario opcional..."></textarea>
+    <div class="modal-actions">
+      <button id="modalCancel" class="secondary">Cancelar</button>
+      <button id="modalSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATE_KEY = 'videoLib';
+
+let data = {};
+let searchTerm = '';
+let filterCategory = '';
+let sortOrder = ''; // '', 'asc', 'desc'
+
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const emptyState = document.getElementById('emptyState');
+const searchInput = document.getElementById('searchInput');
+const themeFilter = document.getElementById('themeFilter');
+const toast = document.getElementById('toast');
+
+/* --- Persistencia --- */
+const pageTitle = document.getElementById('pageTitle');
+
+function saveState(){
+  localStorage.setItem(STATE_KEY, JSON.stringify({
+    rawText: input.value,
+    data: data,
+    title: pageTitle.textContent
+  }));
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    if(!raw) return false;
+    const saved = JSON.parse(raw);
+    if(saved.rawText != null) input.value = saved.rawText;
+    if(saved.data) data = saved.data;
+    if(saved.title) pageTitle.textContent = saved.title;
+    return true;
+  } catch { return false; }
+}
+
+// Guardar título al perder foco o apretar Enter
+pageTitle.addEventListener('blur', saveState);
+pageTitle.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    pageTitle.blur();
+  }
+});
+
+/* --- Parse --- */
+function parseLine(line){
+  const match = line.match(/^(https?:\/\/\S+?)(?:\s+(.+))?$/);
+  if(!match) return null;
+  let note = (match[2] || '').trim();
+  if(note.startsWith('(') && note.endsWith(')')) note = note.slice(1, -1).trim();
+  return { url: match[1], note };
+}
+
+function parseText(text, defaultCategory = 'Sin categoría'){
+  const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+  const result = {};
+  let currentTitle = null;
+  for(const line of lines){
+    if(/^https?:\/\//i.test(line)){
+      if(!currentTitle) currentTitle = defaultCategory;
+      if(!result[currentTitle]) result[currentTitle] = [];
+      const parsed = parseLine(line);
+      if(parsed) result[currentTitle].push(parsed);
+    } else {
+      currentTitle = line;
+      if(!result[currentTitle]) result[currentTitle] = [];
+    }
+  }
+  return result;
+}
+
+/* --- Render --- */
+function render(){
+  output.innerHTML = '';
+  let hasVisible = false;
+
+  const keys = Object.keys(data);
+  if(keys.length === 0){
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  emptyState.classList.add('hidden');
+
+  const q = searchTerm.toLowerCase().trim();
+
+  let sortedKeys = [...keys];
+  if(sortOrder === 'asc') sortedKeys.sort((a, b) => a.localeCompare(b));
+  else if(sortOrder === 'desc') sortedKeys.sort((a, b) => b.localeCompare(a));
+
+  for(const title of sortedKeys){
+    if(filterCategory && title !== filterCategory) continue;
+
+    const items = data[title].filter(item => {
+      if(!q) return true;
+      return title.toLowerCase().includes(q)
+        || item.url.toLowerCase().includes(q)
+        || item.note.toLowerCase().includes(q);
+    });
+
+    if(items.length === 0 && q) continue;
+    hasVisible = true;
+
+    const div = document.createElement('div');
+    div.className = 'group';
+
+    const head = document.createElement('div');
+    head.className = 'group-head';
+    head.setAttribute('data-toggle', title);
+
+    const h3 = document.createElement('h3');
+    h3.innerHTML = `<span class="chevron">&#9660;</span> ${title.replace(/&/g,'&amp;')}`;
+    const count = document.createElement('span');
+    count.className = 'count';
+    count.textContent = `(${items.length})`;
+    h3.appendChild(count);
+    head.appendChild(h3);
+
+    const actions = document.createElement('div');
+    actions.className = 'group-actions';
+    actions.innerHTML = `
+      <button class="openAll" data-title="${title.replace(/"/g,'&quot;')}">Abrir todos</button>
+      <button class="moveCat secondary" data-title="${title.replace(/"/g,'&quot;')}">Mover a...</button>
+      <button class="renameCat secondary" data-title="${title.replace(/"/g,'&quot;')}">Renombrar</button>
+      <button class="deleteCat danger" data-title="${title.replace(/"/g,'&quot;')}">Eliminar</button>
+    `;
+    head.appendChild(actions);
+    div.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'group-body';
+
+    const ul = document.createElement('ul');
+    items.forEach((item, idx) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="li-link"><a href="${item.url.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" target="_blank" rel="noopener">${item.url.replace(/&/g,'&amp;')}</a>` +
+        (item.note ? ` <span class="note">${item.note.replace(/&/g,'&amp;')}</span>` : '') +
+        `</span>` +
+        `<span class="li-actions">` +
+        `<button class="li-edit" data-cat="${title.replace(/"/g,'&quot;')}" data-idx="${idx}" title="Editar">✎</button>` +
+        `<button class="li-del" data-cat="${title.replace(/"/g,'&quot;')}" data-idx="${idx}" title="Eliminar">✕</button>` +
+        `</span>`;
+      ul.appendChild(li);
+    });
+    body.appendChild(ul);
+    div.appendChild(body);
+
+    if(!q) div.classList.add('collapsed');
+
+    output.appendChild(div);
+  }
+
+  if(!hasVisible){
+    emptyState.classList.remove('hidden');
+    emptyState.innerHTML = '<p>No se encontraron resultados para tu búsqueda.</p>';
+  }
+
+  const totalLinks = Object.values(data).flat().length;
+  const countEl = document.getElementById('resultCount');
+  if(q){
+    const shown = [...document.querySelectorAll('.group li')].length;
+    countEl.textContent = `${shown} de ${totalLinks} links`;
+  } else {
+    countEl.textContent = `${totalLinks} links`;
+  }
+}
+
+/* --- Acciones de categorías --- */
+function deleteCategory(title){
+  if(!confirm(`¿Eliminar la categoría "${title}" y todos sus links?`)) return;
+  delete data[title];
+  updateFilterOptions();
+  render();
+  saveState();
+  showToast(`Categoría "${title}" eliminada`);
+}
+
+function renameCategory(oldTitle){
+  const newTitle = prompt('Nuevo nombre para la categoría:', oldTitle);
+  if(!newTitle || newTitle.trim() === '' || newTitle === oldTitle) return;
+  const t = newTitle.trim();
+  if(data[t]){
+    showToast(`Ya existe una categoría llamada "${t}"`);
+    return;
+  }
+  data[t] = data[oldTitle];
+  delete data[oldTitle];
+  updateFilterOptions();
+  render();
+  saveState();
+  showToast(`Renombrada a "${t}"`);
+}
+
+function moveCategory(source){
+  const cats = Object.keys(data).filter(c => c !== source);
+  if(cats.length === 0){
+    showToast('No hay otras categorías para mover los links');
+    return;
+  }
+  const dest = prompt(`¿A qué categoría querés mover los links de "${source}"?\nDisponibles: ${cats.join(', ')}`);
+  if(!dest || dest.trim() === '') return;
+  const d = dest.trim();
+  if(d === source){
+    showToast('Son la misma categoría');
+    return;
+  }
+  if(!data[d]){
+    showToast(`No existe la categoría "${d}"`);
+    return;
+  }
+  data[d] = data[d].concat(data[source]);
+  delete data[source];
+  updateFilterOptions();
+  render();
+  saveState();
+  showToast(`Links movidos de "${source}" a "${d}"`);
+}
+
+function openAllCategory(title){
+  const items = data[title] || [];
+  items.forEach(item => window.open(item.url, '_blank'));
+  showToast(`Abriendo ${items.length} link(s) de "${title}"`);
+}
+
+function deleteLink(cat, idx){
+  if(!data[cat] || !data[cat][idx]) return;
+  const item = data[cat][idx];
+  if(!confirm(`¿Eliminar este link?\n${item.url}${item.note ? ' ('+item.note+')' : ''}`)) return;
+  data[cat].splice(idx, 1);
+  if(data[cat].length === 0) delete data[cat];
+  updateFilterOptions();
+  render();
+  saveState();
+  showToast('Link eliminado');
+}
+
+let editTarget = null;
+
+function openModal(cat, idx){
+  const item = data[cat]?.[idx];
+  if(!item) return;
+  editTarget = { cat, idx };
+  document.getElementById('modalUrl').value = item.url;
+  document.getElementById('modalNote').value = item.note || '';
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalUrl').focus();
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+  editTarget = null;
+}
+
+function saveModal(){
+  if(!editTarget) return;
+  const { cat, idx } = editTarget;
+  const url = document.getElementById('modalUrl').value.trim();
+  const note = document.getElementById('modalNote').value.trim();
+  if(!url){
+    showToast('La URL no puede estar vacía');
+    return;
+  }
+  data[cat][idx] = { url, note };
+  closeModal();
+  render();
+  saveState();
+  showToast('Link actualizado');
+}
+
+function editLink(cat, idx){
+  openModal(cat, idx);
+}
+
+document.getElementById('modalSave').addEventListener('click', saveModal);
+document.getElementById('modalCancel').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if(e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.getElementById('modalOverlay').classList.contains('show')) closeModal();
+});
+
+function addCategory(){
+  const name = prompt('Nombre de la nueva categoría:');
+  if(!name || name.trim() === '') return;
+  const t = name.trim();
+  if(data[t]){
+    showToast(`Ya existe la categoría "${t}"`);
+    return;
+  }
+  data[t] = [];
+  updateFilterOptions();
+  render();
+  saveState();
+  showToast(`Categoría "${t}" creada`);
+}
+
+/* --- Filtros --- */
+function populateSelect(sel, options, emptyLabel, prevValue){
+  sel.innerHTML = `<option value="">${emptyLabel}</option>`;
+  options.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    sel.appendChild(opt);
+  });
+  if(prevValue && options.includes(prevValue)) sel.value = prevValue;
+}
+
+function updateFilterOptions(){
+  const prevCat = themeFilter.value;
+  const cats = Object.keys(data);
+  populateSelect(themeFilter, cats, 'Todas las categorías', prevCat);
+  filterCategory = themeFilter.value;
+  filterCategoryDropdown();
+}
+
+function filterCategoryDropdown(){
+  const input = document.getElementById('defaultCategory');
+  const dropdown = document.getElementById('catDropdown');
+  const q = input.value.trim().toLowerCase();
+  const cats = Object.keys(data);
+
+  const filtered = q ? cats.filter(c => c.toLowerCase().includes(q)) : cats;
+
+  if(filtered.length === 0 || !input.matches(':focus')){
+    dropdown.classList.remove('show');
+    return;
+  }
+
+  dropdown.innerHTML = filtered.map(c =>
+    `<div class="cat-opt" data-cat="${c.replace(/"/g,'&quot;')}">${c}</div>`
+  ).join('');
+  dropdown.classList.add('show');
+}
+
+// Eventos del dropdown de categoría
+document.getElementById('defaultCategory').addEventListener('input', filterCategoryDropdown);
+document.getElementById('defaultCategory').addEventListener('focus', filterCategoryDropdown);
+document.getElementById('defaultCategory').addEventListener('blur', () => {
+  setTimeout(() => document.getElementById('catDropdown').classList.remove('show'), 150);
+});
+document.getElementById('defaultCategory').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    const first = document.querySelector('#catDropdown .cat-opt:first-child');
+    if(first){
+      document.getElementById('defaultCategory').value = first.dataset.cat;
+      document.getElementById('catDropdown').classList.remove('show');
+    }
+  }
+  if(e.key === 'Escape'){
+    document.getElementById('catDropdown').classList.remove('show');
+  }
+});
+document.getElementById('catDropdown').addEventListener('click', e => {
+  const opt = e.target.closest('.cat-opt');
+  if(!opt) return;
+  document.getElementById('defaultCategory').value = opt.dataset.cat;
+  document.getElementById('catDropdown').classList.remove('show');
+});
+
+/* --- Toast --- */
+let toastTimer = null;
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+/* --- Tema --- */
+const THEMES = ['oled', '', 'dark'];
+const THEME_NAMES = { 'oled': 'OLED', '': 'Claro', 'dark': 'Oscuro' };
+let themeIndex = 0;
+function cycleTheme(){
+  themeIndex = (themeIndex + 1) % THEMES.length;
+  document.body.className = THEMES[themeIndex];
+  document.getElementById('toggleTheme').textContent = THEME_NAMES[THEMES[themeIndex]];
+}
+
+/* --- Export / Import --- */
+function getBaseFileName(){
+  const path = window.location.pathname.split('/').pop() || '';
+  return path.replace(/\.\w+$/, '').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '') || 'biblioteca';
+}
+
+function exportJSON(){
+  const payload = { data, rawText: input.value, title: pageTitle.textContent };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const base = getBaseFileName();
+  const custom = pageTitle.textContent.trim().replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '').replace(/\s+/g, ' ') || 'sin-titulo';
+  a.download = `${base} - ${custom}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exportado como "${base} - ${custom}.json"`);
+}
+
+function importJSON(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if(payload.data && typeof payload.data === 'object'){
+        data = payload.data;
+        if(payload.rawText != null) input.value = payload.rawText;
+        updateFilterOptions();
+        render();
+        saveState();
+        showToast('Importación exitosa');
+      } else {
+        showToast('El archivo no tiene el formato esperado');
+      }
+    } catch {
+      showToast('Error al leer el archivo JSON');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* --- Duplicados --- */
+function getUrlMap(){
+  const map = new Map();
+  for(const cat of Object.keys(data)){
+    for(const item of data[cat]){
+      if(!map.has(item.url)) map.set(item.url, []);
+      map.get(item.url).push(cat);
+    }
+  }
+  return map;
+}
+
+function extractUrlsFromText(text){
+  return text.split(/\n/).map(l => {
+    const m = l.trim().match(/^(https?:\/\/\S+?)(?:\s|$)/);
+    return m ? m[1] : null;
+  }).filter(Boolean);
+}
+
+function checkDuplicates(urls, urlMap){
+  const dups = [];   // { url, categories: [...] }
+  const clean = [];
+  for(const url of urls){
+    if(urlMap.has(url)) dups.push({ url, categories: urlMap.get(url) });
+    else clean.push(url);
+  }
+  return { dups, clean };
+}
+
+/* --- Eventos --- */
+
+// Procesar
+document.getElementById('process').addEventListener('click', () => {
+  const defInput = document.getElementById('defaultCategory');
+  const defVal = defInput.value.trim();
+  const cats = Object.keys(data);
+  const defaultCat = cats.includes(defVal) ? defVal : 'Sin categoría';
+  const text = input.value;
+  const parsed = parseText(text, defaultCat);
+  const urlMap = getUrlMap();
+
+  // recopilar duplicados
+  const allDups = [];
+  const cleanUrls = [];
+  for(const cat of Object.keys(parsed)){
+    const urls = parsed[cat].map(i => i.url);
+    const { dups, clean } = checkDuplicates(urls, urlMap);
+    allDups.push(...dups);
+    cleanUrls.push(...clean);
+    for(const url of clean) urlMap.set(url, [cat]);
+  }
+
+  // preguntar por cada duplicado
+  for(const dup of allDups){
+    const msg = `"${dup.url}"\nya está en: ${dup.categories.join(', ')}\n\n¿Eliminarlo de la biblioteca para reemplazarlo?`;
+    if(confirm(msg)){
+      for(const cat of Object.keys(data)){
+        data[cat] = data[cat].filter(item => item.url !== dup.url);
+        if(data[cat].length === 0) delete data[cat];
+      }
+    }
+  }
+
+  // re-parsear duplicados ya eliminados
+  const urlMap2 = getUrlMap();
+  const finalParsed = {};
+  let totalAdded = 0;
+
+  for(const cat of Object.keys(parsed)){
+    const items = parsed[cat];
+    const cleanItems = items.filter(i => !urlMap2.has(i.url));
+    if(cleanItems.length > 0){
+      if(!finalParsed[cat]) finalParsed[cat] = [];
+      finalParsed[cat] = finalParsed[cat].concat(cleanItems);
+      totalAdded += cleanItems.length;
+      for(const item of cleanItems) urlMap2.set(item.url, [cat]);
+    }
+  }
+
+  for(const cat of Object.keys(finalParsed)){
+    if(!data[cat]) data[cat] = [];
+    data[cat] = data[cat].concat(finalParsed[cat]);
+  }
+
+  input.value = '';
+  document.getElementById('defaultCategory').value = '';
+  updateFilterOptions();
+  render();
+  saveState();
+
+  if(allDups.length > 0 || totalAdded > 0){
+    showToast(`${totalAdded} link(s) agregado(s)`);
+  } else {
+    showToast('No se agregaron links nuevos');
+  }
+});
+
+// Tema
+document.getElementById('toggleTheme').addEventListener('click', cycleTheme);
+
+// Búsqueda
+searchInput.addEventListener('input', () => {
+  searchTerm = searchInput.value;
+  render();
+});
+
+// Filtro por categoría
+themeFilter.addEventListener('change', () => {
+  filterCategory = themeFilter.value;
+  render();
+});
+
+// Orden
+document.getElementById('sortBtn').addEventListener('click', () => {
+  const btn = document.getElementById('sortBtn');
+  if(sortOrder === '') sortOrder = 'asc';
+  else if(sortOrder === 'asc') sortOrder = 'desc';
+  else sortOrder = '';
+  btn.textContent = sortOrder === 'asc' ? 'A-Z ↑' : sortOrder === 'desc' ? 'Z-A ↓' : 'A-Z ↓';
+  render();
+});
+
+// Export
+document.getElementById('exportBtn').addEventListener('click', exportJSON);
+
+// Import
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importInput').click();
+});
+document.getElementById('importInput').addEventListener('change', e => {
+  if(e.target.files[0]) importJSON(e.target.files[0]);
+  e.target.value = '';
+});
+
+document.getElementById('addCategoryBtn').addEventListener('click', addCategory);
+
+document.getElementById('newBtn').addEventListener('click', () => {
+  if(Object.keys(data).length === 0 && !input.value.trim()){
+    showToast('Ya está vacío');
+    return;
+  }
+  if(!confirm('¿Crear una lista nueva? Se borrará todo el contenido actual.')) return;
+  data = {};
+  input.value = '';
+  pageTitle.textContent = 'LinkVault';
+  updateFilterOptions();
+  render();
+  saveState();
+  showToast('Lista nueva creada');
+});
+
+document.getElementById('checkDupBtn').addEventListener('click', () => {
+  const textUrls = extractUrlsFromText(input.value);
+  if(textUrls.length === 0){
+    showToast('No hay URLs en el textarea');
+    return;
+  }
+  const urlMap = getUrlMap();
+  const { dups, clean } = checkDuplicates(textUrls, urlMap);
+  if(dups.length === 0){
+    showToast(`Ninguno de los ${textUrls.length} link(s) está duplicado`);
+  } else {
+    const lines = dups.map(d => d.url + ' → ' + d.categories.join(', '));
+    showToast(`${dups.length} de ${textUrls.length} link(s) ya existen:\n${lines.join('\n')}`);
+  }
+});
+
+// Delegación de eventos para acciones de categorías, links y colapso
+output.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if(btn){
+    const title = btn.dataset.title;
+    const cat = btn.dataset.cat;
+    const idx = btn.dataset.idx;
+    if(idx !== undefined && cat){
+      if(btn.classList.contains('li-del')) deleteLink(cat, parseInt(idx));
+      else if(btn.classList.contains('li-edit')) editLink(cat, parseInt(idx));
+      return;
+    }
+    if(!title) return;
+    if(btn.classList.contains('deleteCat')) deleteCategory(title);
+    else if(btn.classList.contains('renameCat')) renameCategory(title);
+    else if(btn.classList.contains('moveCat')) moveCategory(title);
+    else if(btn.classList.contains('openAll')) openAllCategory(title);
+    return;
+  }
+  const head = e.target.closest('.group-head');
+  if(head){
+    const group = head.closest('.group');
+    if(group) group.classList.toggle('collapsed');
+  }
+});
+
+/* --- Inicialización --- */
+function init(){
+  const bodyClass = document.body.className;
+  const idx = THEMES.indexOf(bodyClass);
+  if(idx !== -1) themeIndex = idx;
+  document.getElementById('toggleTheme').textContent = THEME_NAMES[bodyClass] || 'OLED';
+  const hasSaved = loadState();
+  if(hasSaved && Object.keys(data).length > 0){
+    updateFilterOptions();
+    render();
+  } else {
+    data = {};
+    updateFilterOptions();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
