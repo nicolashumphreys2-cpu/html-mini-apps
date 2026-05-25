@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HTML Mini Apps</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 40px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #bbb;
+      margin-bottom: 40px;
+    }
+
+    .apps {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      width: 300px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+    }
+
+    .card a {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 15px;
+      background: #2d6cdf;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    .card a:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>HTML Mini Apps</h1>
+
+  <p>
+    Collection of lightweight web applications built with HTML, CSS and JavaScript.
+  </p>
+
+  <div class="apps">
+
+    <div class="card">
+      <h2>Daily Expense Tracker</h2>
+
+      <p>
+        Expense tracking app with smart categories,
+        automatic cleanup and JSON backup support.
+      </p>
+
+      <a href="./daily-expense-tracker/">
+        Open App
+      </a>
+    </div>
+
+    <div class="card">
+      <h2>LinkVault</h2>
+
+      <p>
+        Lightweight bookmark manager for organizing
+        and accessing saved links quickly.
+      </p>
+
+      <a href="./link-vault/">
+        Open App
+      </a>
+    </div>
+
+  </div>
+
+</body>
+</html>
